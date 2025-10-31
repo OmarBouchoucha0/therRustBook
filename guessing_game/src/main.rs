@@ -11,7 +11,8 @@ fn main() {
             .read_line(&mut guess)
             .expect("Failed To Read Line");
         let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
+            Ok(num) if (1..=10).contains(&num) => num,
+            Ok(_) => continue,
             Err(_) => continue,
         };
         match guess.cmp(&target) {
