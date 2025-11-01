@@ -1,1 +1,5 @@
-debug/
+# Ignore Rust build artifacts
+/target/
+**/target/
+**/debug/
+
