@@ -1,4 +1,6 @@
-use std::{env, fs, process};
+use minigrep::parse_file;
+use std::{env, error::Error, fs, process};
+
 struct Config {
     query: String,
     path: String,
@@ -15,25 +17,28 @@ impl Config {
     }
 }
 
-fn parse_file(contents: &str, query: &str) -> bool {
-    for word in contents.split_whitespace() {
-        if query == word {
-            return true;
-        }
-    }
-    false
+fn read_file(config: &Config) -> Result<String, Box<dyn Error>> {
+    let contents = fs::read_to_string(&config.path)?;
+    Ok(contents)
 }
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let config = Config::build(&args).unwrap_or_else(|err| {
         println!("Problem Parsing Arguments : {err}");
         process::exit(1);
     });
-    let contents = fs::read_to_string(config.path).expect("Coundt file the Path");
 
-    if parse_file(&contents, &config.query) {
-        println!("word found");
-    } else {
-        println!("word not found");
+    let contents = match read_file(&config) {
+        Ok(content) => content,
+        Err(e) => {
+            println!("Reading Fille : {e}");
+            process::exit(1);
+        }
+    };
+
+    let result = parse_file(&contents, &config.query);
+    if !result.is_empty() {
+        println!("{:#?}", result);
     }
 }
