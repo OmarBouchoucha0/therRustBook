@@ -15,14 +15,14 @@ fn grep<'a>(contents: &'a String, config: &Config) -> Vec<&'a str> {
 fn main() {
     let args: Vec<String> = env::args().collect();
     let config = Config::build(&args, true).unwrap_or_else(|err| {
-        println!("Problem Parsing Arguments : {err}");
+        eprintln!("Problem Parsing Arguments : {err}");
         process::exit(1);
     });
 
     let contents = match read_file(&config) {
         Ok(content) => content,
         Err(e) => {
-            println!("Reading Fille : {e}");
+            eprintln!("Reading Fille : {e}");
             process::exit(1);
         }
     };
