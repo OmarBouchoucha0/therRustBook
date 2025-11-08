@@ -1,30 +1,20 @@
-use minigrep::parse_file;
+use minigrep::*;
 use std::{env, error::Error, fs, process};
-
-struct Config {
-    query: String,
-    path: String,
-}
-
-impl Config {
-    fn build(args: &Vec<String>) -> Result<Config, &'static str> {
-        if args.len() != 3 {
-            return Err("Requires query and path");
-        }
-        let query = args[1].clone();
-        let path = args[2].clone();
-        Ok(Config { query, path })
-    }
-}
 
 fn read_file(config: &Config) -> Result<String, Box<dyn Error>> {
     let contents = fs::read_to_string(&config.path)?;
     Ok(contents)
 }
+fn grep<'a>(contents: &'a String, config: &Config) -> Vec<&'a str> {
+    if config.case_sensitive {
+        return parse_file(contents, &config.query);
+    }
+    parse_file_case_insensitive(contents, &config.query)
+}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let config = Config::build(&args).unwrap_or_else(|err| {
+    let config = Config::build(&args, true).unwrap_or_else(|err| {
         println!("Problem Parsing Arguments : {err}");
         process::exit(1);
     });
@@ -37,7 +27,7 @@ fn main() {
         }
     };
 
-    let result = parse_file(&contents, &config.query);
+    let result = grep(&contents, &config);
     if !result.is_empty() {
         println!("{:#?}", result);
     }
